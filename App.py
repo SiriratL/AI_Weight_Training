@@ -1,4 +1,4 @@
-from settings import get_sit_up_with_weights, get_dumbbell_fly, get_barbell_curl, get_dumbbell_lateral_raise, get_seated_tricep_press, get_bent_over_two_arm_dumbbell_row, get_squat_with_weights
+from settings import get_sit_up_with_weights, get_dumbbell_fly, get_barbell_curl, get_dumbbell_lateral_raise, get_seated_tricep_press, get_bent_over_dumbbell_row, get_squat_with_weights
 from activity import Activity
 from utils import get_mediapipe_pose
 import av
@@ -9,7 +9,7 @@ st.title('AI Weight Training Coach')
 
 with st.sidebar:
     activity = st.radio(
-        'Select Activity', ['Sit-up with Weights', 'Dumbbell Fly', 'Barbell Curl', 'Dumbbell Lateral Raise', 'Seated Tricep Press', 'Bent Over two-arm Dumbbell Row', 'Squat with Weights'])
+        'Select Activity', ['Sit-up with Weights', 'Dumbbell Fly', 'Barbell Curl', 'Dumbbell Lateral Raise', 'Seated Tricep Press', 'Bent Over Dumbbell Row', 'Squat with Weights'])
 
 settings = None
 
@@ -23,8 +23,8 @@ elif activity == 'Dumbbell Lateral Raise':
     settings = get_dumbbell_lateral_raise()
 elif activity == 'Seated Tricep Press':
     settings = get_seated_tricep_press()
-elif activity == 'Bent Over two-arm Dumbbell Row':
-    settings = get_bent_over_two_arm_dumbbell_row()
+elif activity == 'Bent Over Dumbbell Row':
+    settings = get_bent_over_dumbbell_row()
 elif activity == 'Squat with Weights':
     settings = get_squat_with_weights()
 
@@ -45,8 +45,8 @@ def video_frame_callback(frame: av.VideoFrame):
         frame, _ = live.process_dumbbell_lateral_raise(frame, pose)
     elif activity == 'Seated Tricep Press':
         frame, _ = live.process_seated_tricep_press(frame, pose)
-    elif activity == 'Bent Over two-arm Dumbbell Row':
-        frame, _ = live.process_bent_over_two_arm_dumbbell_row(frame, pose)
+    elif activity == 'Bent Over Dumbbell Row':
+        frame, _ = live.process_bent_over_dumbbell_row(frame, pose)
     elif activity == 'Squat with Weights':
         frame, _ = live.process_squat_with_weights(frame, pose)
     # Encode and return BGR frame

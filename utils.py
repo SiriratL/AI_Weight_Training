@@ -1,6 +1,7 @@
 import cv2
 import mediapipe as mp
 import numpy as np
+import math
 
 
 def draw_rounded_rect(img, rect_start, rect_end, corner_width, box_color):
@@ -86,10 +87,14 @@ def find_angle(p1, p2, ref_pt=np.array([0, 0])):
     cos_theta = (np.dot(p1_ref, p2_ref)) / \
         (1.0 * np.linalg.norm(p1_ref) * np.linalg.norm(p2_ref))
     theta = np.arccos(np.clip(cos_theta, -1.0, 1.0))
-
     degree = int(180 / np.pi) * theta
-
+        
     return int(degree)
+
+
+def find_dist(p1, p2):
+    dist = math.sqrt((p2[0]-p1[0])**2+(p2[1]-p1[1])**2)
+    return dist
 
 
 def get_landmark_array(pose_landmark, key, frame_width, frame_height):
@@ -98,6 +103,12 @@ def get_landmark_array(pose_landmark, key, frame_width, frame_height):
     denorm_y = int(pose_landmark[key].y * frame_height)
 
     return np.array([denorm_x, denorm_y])
+
+def get_visibility(pose_landmark, dict_features, feature, kp):
+
+    visibility = pose_landmark[dict_features[feature][kp]].visibility
+
+    return visibility
 
 
 def get_landmark_features(kp_results, dict_features, feature, frame_width, frame_height):
