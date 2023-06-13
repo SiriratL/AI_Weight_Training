@@ -2,7 +2,7 @@ import time
 import cv2
 import numpy as np
 from utils import find_angle, find_dist, get_landmark_features, draw_text, draw_dotted_line, get_visibility
-
+from pygame import mixer
 
 class Activity:
     def __init__(self, settings, flip_frame=False):
@@ -20,6 +20,9 @@ class Activity:
 
         # set radius to draw arc
         self.radius = 20
+
+        self.prev_frame_time = 0
+        self.new_frame_time = 0
 
         # Colors in RGB format.
         self.COLORS = {
@@ -111,8 +114,20 @@ class Activity:
 
         return frame
 
+    def play_sound(self, path):
+        audio_dir = f'./asset/audio/{path}.mp3'
+        mixer.init()
+        mixer.music.load(audio_dir)
+        mixer.music.play()
+        return
+    
     def process_sit_up_with_weights(self, frame: np.array, pose):
         play_sound = None
+
+        new_frame_time = time.time()
+        fps = 1/(new_frame_time-self.prev_frame_time)
+        self.prev_frame_time = new_frame_time
+        fps = str(int(fps))
 
         frame_height, frame_width, _ = frame.shape
 
@@ -330,6 +345,7 @@ class Activity:
 
                 else:
                     # ------------------- Start Change Here 4--------------
+                    
                     #if self.settings['HIP_THRESH'] > hip_vertical_angle:
                     #    self.state_tracker['DISPLAY_TEXT'][0] = True
                     #    self.state_tracker['INCORRECT_POSTURE'] = True
@@ -337,6 +353,7 @@ class Activity:
                     if hip_upper_y > ankle_lower_y:
                         self.state_tracker['DISPLAY_TEXT'][1] = True
                         self.state_tracker['INCORRECT_POSTURE'] = True
+                        self.play_sound('Situp_1')
                     # ------------------- End Change Here 4 --------------
                 # ----------------------------------------------------------------------------------------------------
 
@@ -413,6 +430,16 @@ class Activity:
 
                 )
 
+                draw_text(
+                    frame,
+                    "FPS: " + fps,
+                    pos=(int(frame_width*0.81), frame_height-30),
+                    text_color=(255, 255, 230),
+                    font_scale=0.7,
+                    text_color_bg=(102, 0, 204),
+
+                )
+
                 self.state_tracker['DISPLAY_TEXT'][self.state_tracker['COUNT_FRAMES']
                                                    > self.settings['CNT_FRAME_THRESH']] = False
                 self.state_tracker['COUNT_FRAMES'][self.state_tracker['COUNT_FRAMES']
@@ -477,6 +504,11 @@ class Activity:
 
     def process_dumbbell_fly(self, frame: np.array, pose):
         play_sound = None
+
+        new_frame_time = time.time()
+        fps = 1/(new_frame_time-self.prev_frame_time)
+        self.prev_frame_time = new_frame_time
+        fps = str(int(fps))
 
         frame_height, frame_width, _ = frame.shape
 
@@ -651,16 +683,16 @@ class Activity:
                            self.COLORS['yellow'], -1,  lineType=self.linetype)
                 cv2.circle(frame, left_wrist_coord, 7,
                            self.COLORS['yellow'], -1,  lineType=self.linetype)
-                cv2.circle(frame, left_hip_coord, 7,
-                           self.COLORS['yellow'], -1,  lineType=self.linetype)
+                #cv2.circle(frame, left_hip_coord, 7,
+                #           self.COLORS['yellow'], -1,  lineType=self.linetype)
                 cv2.circle(frame, right_shldr_coord, 7,
                            self.COLORS['yellow'], -1,  lineType=self.linetype)
                 cv2.circle(frame, right_elbow_coord, 7,
                            self.COLORS['yellow'], -1,  lineType=self.linetype)
                 cv2.circle(frame, right_wrist_coord, 7,
                            self.COLORS['yellow'], -1,  lineType=self.linetype)
-                cv2.circle(frame, right_hip_coord, 7,
-                           self.COLORS['yellow'], -1,  lineType=self.linetype)
+                #cv2.circle(frame, right_hip_coord, 7,
+                #           self.COLORS['yellow'], -1,  lineType=self.linetype)
                 #cv2.circle(frame, mid_knee_coord, 7,
                 #           self.COLORS['red'], -1,  lineType=self.linetype)
 
@@ -708,6 +740,7 @@ class Activity:
                     if (left_shldr_wrist_elbow_angle < self.settings['ELBOW_THRESH'] or right_shldr_wrist_elbow_angle < self.settings['ELBOW_THRESH']):
                         self.state_tracker['DISPLAY_TEXT'][1] = True
                         self.state_tracker['INCORRECT_POSTURE'] = True
+                        self.play_sound('Dumbbellfly_1')
                     # ------------------- End Change Here 4 --------------
 
                 # ----------------------------------------------------------------------------------------------------
@@ -812,6 +845,16 @@ class Activity:
 
                 )
 
+                draw_text(
+                    frame,
+                    "FPS: " + fps,
+                    pos=(int(frame_width*0.81), frame_height-30),
+                    text_color=(255, 255, 230),
+                    font_scale=0.7,
+                    text_color_bg=(102, 0, 204),
+
+                )
+
                 self.state_tracker['DISPLAY_TEXT'][self.state_tracker['COUNT_FRAMES']
                                                    > self.settings['CNT_FRAME_THRESH']] = False
                 self.state_tracker['COUNT_FRAMES'][self.state_tracker['COUNT_FRAMES']
@@ -874,6 +917,11 @@ class Activity:
 
     def process_barbell_curl(self, frame: np.array, pose):
         play_sound = None
+
+        new_frame_time = time.time()
+        fps = 1/(new_frame_time-self.prev_frame_time)
+        self.prev_frame_time = new_frame_time
+        fps = str(int(fps))
 
         frame_height, frame_width, _ = frame.shape
 
@@ -1067,7 +1115,7 @@ class Activity:
                         self.state_tracker['INCORRECT_COUNT'] += 1
                         play_sound = 'incorrect'
 
-                    elif self.state_tracker['INCORRECT_POSTURE']:
+                    elif self.state_tracker['INCORRECT_POSTURE'] and len(self.state_tracker['state_seq']) != 1:
                         self.state_tracker['INCORRECT_COUNT'] += 1
                         play_sound = 'incorrect'
 
@@ -1080,13 +1128,24 @@ class Activity:
 
                 else:
                     # ------------------- Start Change Here 4--------------
+                    ply0 = False
+                    ply1 = False
+
+
                     if self.settings['SHOULDER_THRESH'] < hip_elbow_shldr_angle:
                         self.state_tracker['DISPLAY_TEXT'][0] = True
                         self.state_tracker['INCORRECT_POSTURE'] = True
+                        ply0 = True
 
                     if self.settings['HIP_THRESH'] < hip_vertical_angle:
                         self.state_tracker['DISPLAY_TEXT'][1] = True
                         self.state_tracker['INCORRECT_POSTURE'] = True
+                        ply1 = True
+
+                    if (ply0 == True and ply1 == True) or (ply0 == True and ply1 ==False) :
+                        self.play_sound('Barbellcurl_0')
+                    elif ply0 == False and ply1 == True:
+                        self.play_sound('Barbellcurl_1')
 
                 # ------------------- End Change Here 4 --------------
                 # ----------------------------------------------------------------------------------------------------
@@ -1172,6 +1231,16 @@ class Activity:
 
                 )
 
+                draw_text(
+                    frame,
+                    "FPS: " + fps,
+                    pos=(int(frame_width*0.81), frame_height-30),
+                    text_color=(255, 255, 230),
+                    font_scale=0.7,
+                    text_color_bg=(102, 0, 204),
+
+                )
+
                 self.state_tracker['DISPLAY_TEXT'][self.state_tracker['COUNT_FRAMES']
                                                    > self.settings['CNT_FRAME_THRESH']] = False
                 self.state_tracker['COUNT_FRAMES'][self.state_tracker['COUNT_FRAMES']
@@ -1236,6 +1305,11 @@ class Activity:
 
     def process_dumbbell_lateral_raise(self, frame: np.array, pose):
         play_sound = None
+
+        new_frame_time = time.time()
+        fps = 1/(new_frame_time-self.prev_frame_time)
+        self.prev_frame_time = new_frame_time
+        fps = str(int(fps))
 
         frame_height, frame_width, _ = frame.shape
 
@@ -1443,6 +1517,7 @@ class Activity:
                     if (left_shldr_wrist_elbow_angle < self.settings['ELBOW_THRESH'] or right_shldr_wrist_elbow_angle < self.settings['ELBOW_THRESH']):
                         self.state_tracker['DISPLAY_TEXT'][1] = True
                         self.state_tracker['INCORRECT_POSTURE'] = True
+                        self.play_sound('Lateral_1')
                     # ------------------- End Change Here 4 --------------
 
                 # ----------------------------------------------------------------------------------------------------
@@ -1546,6 +1621,16 @@ class Activity:
 
                 )
 
+                draw_text(
+                    frame,
+                    "FPS: " + fps,
+                    pos=(int(frame_width*0.81), frame_height-30),
+                    text_color=(255, 255, 230),
+                    font_scale=0.7,
+                    text_color_bg=(102, 0, 204),
+
+                )
+
                 self.state_tracker['DISPLAY_TEXT'][self.state_tracker['COUNT_FRAMES']
                                                    > self.settings['CNT_FRAME_THRESH']] = False
                 self.state_tracker['COUNT_FRAMES'][self.state_tracker['COUNT_FRAMES']
@@ -1608,6 +1693,11 @@ class Activity:
 
     def process_seated_tricep_press(self, frame: np.array, pose):
         play_sound = None
+
+        new_frame_time = time.time()
+        fps = 1/(new_frame_time-self.prev_frame_time)
+        self.prev_frame_time = new_frame_time
+        fps = str(int(fps))
 
         frame_height, frame_width, _ = frame.shape
 
@@ -1830,12 +1920,23 @@ class Activity:
 
                 else:
                     # ------------------- Start Change Here 4--------------
+                    ply0 = False
+                    ply1 = False
+
                     if self.settings['SHLDR_THRESH'] < shldr_vertical_angle:
                         self.state_tracker['DISPLAY_TEXT'][0] = True
+                        ply0 = True
 
                     if (hip_vertical_angle > self.settings['HIP_THRESH']):
                         self.state_tracker['DISPLAY_TEXT'][1] = True
                         self.state_tracker['INCORRECT_POSTURE'] = True
+                        ply1 = True
+
+                    if (ply0 == True and ply1 == True) or (ply0 == True and ply1 ==False) :
+                        self.play_sound('Tricep_0')
+                    elif ply0 == False and ply1 == True:
+                        self.play_sound('Tricep_1')
+
                     # ------------------- End Change Here 4 --------------
                 # ----------------------------------------------------------------------------------------------------
 
@@ -1920,6 +2021,16 @@ class Activity:
 
                 )
 
+                draw_text(
+                    frame,
+                    "FPS: " + fps,
+                    pos=(int(frame_width*0.81), frame_height-30),
+                    text_color=(255, 255, 230),
+                    font_scale=0.7,
+                    text_color_bg=(102, 0, 204),
+
+                )
+
                 self.state_tracker['DISPLAY_TEXT'][self.state_tracker['COUNT_FRAMES']
                                                    > self.settings['CNT_FRAME_THRESH']] = False
                 self.state_tracker['COUNT_FRAMES'][self.state_tracker['COUNT_FRAMES']
@@ -1984,6 +2095,11 @@ class Activity:
 
     def process_bent_over_dumbbell_row(self, frame: np.array, pose):
         play_sound = None
+
+        new_frame_time = time.time()
+        fps = 1/(new_frame_time-self.prev_frame_time)
+        self.prev_frame_time = new_frame_time
+        fps = str(int(fps))
 
         frame_height, frame_width, _ = frame.shape
 
@@ -2223,17 +2339,33 @@ class Activity:
 
                 else:
                     # ------------------- Start Change Here 4--------------
+                    ply0 = False
+                    ply1 = False
+                    ply2 = False
+
+
                     if (hip_vertical_angle < self.settings['HIP_THRESH']):
                         self.state_tracker['DISPLAY_TEXT'][0] = True
                         self.state_tracker['INCORRECT_POSTURE'] = True
+                        ply0 = True
 #
                     if (ankle_vertical_angle > self.settings['ANKLE_THRESH']):
                         self.state_tracker['DISPLAY_TEXT'][1] = True
                         self.state_tracker['INCORRECT_POSTURE'] = True
+                        ply1 = True
 
                     if (self.settings['SHLDR_THRESH'] > ear_hip_shldr_angle):
                         self.state_tracker['DISPLAY_TEXT'][2] = True
                         self.state_tracker['INCORRECT_POSTURE'] = True
+                        ply2 = True
+
+                    if ply1 == True:
+                        self.play_sound('Bentover_1')
+                    elif ply2 == True:
+                        self.play_sound('Bentover_2')
+                    elif ply0 == True:
+                        self.play_sound('Bentover_0')
+
                 # ------------------- End Change Here 4 --------------
                 # ----------------------------------------------------------------------------------------------------
 
@@ -2315,6 +2447,16 @@ class Activity:
 
                 )
 
+                draw_text(
+                    frame,
+                    "FPS: " + fps,
+                    pos=(int(frame_width*0.81), frame_height-30),
+                    text_color=(255, 255, 230),
+                    font_scale=0.7,
+                    text_color_bg=(102, 0, 204),
+
+                )
+
                 self.state_tracker['DISPLAY_TEXT'][self.state_tracker['COUNT_FRAMES']
                                                    > self.settings['CNT_FRAME_THRESH']] = False
                 self.state_tracker['COUNT_FRAMES'][self.state_tracker['COUNT_FRAMES']
@@ -2379,6 +2521,11 @@ class Activity:
 
     def process_squat_with_weights(self, frame: np.array, pose):
         play_sound = None
+
+        new_frame_time = time.time()
+        fps = 1/(new_frame_time-self.prev_frame_time)
+        self.prev_frame_time = new_frame_time
+        fps = str(int(fps))
 
         frame_height, frame_width, _ = frame.shape
 
@@ -2510,7 +2657,7 @@ class Activity:
                 # ------------------- Verical Angle calculation --------------
 
                 knee_vertical_angle = find_angle(
-                    hip_coord, np.array([knee_coord[0], 0]), knee_coord)
+                    hip_coord, np.array([knee_coord[0]+0.1, 0]), knee_coord)
                 cv2.ellipse(frame, knee_coord, (20, 20),
                             angle=0, startAngle=-90, endAngle=-90-multiplier*knee_vertical_angle,
                             color=self.COLORS['white'], thickness=3,  lineType=self.linetype)
@@ -2519,7 +2666,7 @@ class Activity:
                     frame, knee_coord, start=knee_coord[1]-50, end=knee_coord[1]+20, line_color=self.COLORS['blue'])
 
                 ankle_vertical_angle = find_angle(
-                    knee_coord, np.array([ankle_coord[0], 0]), ankle_coord)
+                    knee_coord, np.array([ankle_coord[0]+0.1, 0]), ankle_coord)
                 cv2.ellipse(frame, ankle_coord, (30, 30),
                             angle=0, startAngle=-90, endAngle=-90 + multiplier*ankle_vertical_angle,
                             color=self.COLORS['white'], thickness=3,  lineType=self.linetype)
@@ -2583,17 +2730,28 @@ class Activity:
 
                 else:
                     # ------------------- Start Change Here 4--------------
-                    if self.settings['KNEE_THRESH'][0] < knee_vertical_angle < self.settings['KNEE_THRESH'][1] and \
-                       self.state_tracker['state_seq'].count('s2') == 1:
-                        self.state_tracker['DISPLAY_TEXT'][0] = True
+                    ply2 = False
+                    ply1 = False
 
+                    if self.settings['KNEE_THRESH'][0] < knee_vertical_angle < self.settings['KNEE_THRESH'][1] and \
+                       self.state_tracker['state_seq'].count('s2') == 1 :
+                        self.state_tracker['DISPLAY_TEXT'][0] = True
+                        
                     elif knee_vertical_angle > self.settings['KNEE_THRESH'][2]:
                         self.state_tracker['DISPLAY_TEXT'][2] = True
                         self.state_tracker['INCORRECT_POSTURE'] = True
+                        ply2 = True
 
-                    if (ankle_vertical_angle > self.settings['ANKLE_THRESH']):
+                    elif (ankle_vertical_angle > self.settings['ANKLE_THRESH']):
                         self.state_tracker['DISPLAY_TEXT'][1] = True
                         self.state_tracker['INCORRECT_POSTURE'] = True
+                        ply1 = True
+                    
+                    if ply2 == True:
+                        self.play_sound('Squat_2')
+                    elif ply2 == False and ply1 == True:
+                        self.play_sound('Squat_1')
+
                     # ------------------- End Change Here 4 --------------
                 # ----------------------------------------------------------------------------------------------------
 
@@ -2671,6 +2829,16 @@ class Activity:
                     text_color=(255, 255, 230),
                     font_scale=0.7,
                     text_color_bg=(221, 0, 0),
+
+                )
+
+                draw_text(
+                    frame,
+                    "FPS: " + fps,
+                    pos=(int(frame_width*0.81), frame_height-30),
+                    text_color=(255, 255, 230),
+                    font_scale=0.7,
+                    text_color_bg=(102, 0, 204),
 
                 )
 

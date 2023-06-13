@@ -13,7 +13,7 @@ def get_sit_up_with_weights():
         #'HIP_THRESH': 15,
 
         'OFFSET_THRESH': 40.0,
-        'INACTIVE_THRESH': 15.0,
+        'INACTIVE_THRESH': 10.0,
 
         'CNT_FRAME_THRESH': 50,
 
@@ -36,9 +36,9 @@ def get_sit_up_with_weights():
 def get_dumbbell_fly():
 
     _ANGLE_ELBOW_HIP_SHLDR = {
-        'NORMAL': (15,  30),
-        'TRANS': (31, 89),
-        'PASS': (90, 120)
+        'NORMAL': (1,  30),
+        'TRANS': (31, 74),
+        'PASS': (75, 120)
     }
 
     settings = {
@@ -48,10 +48,10 @@ def get_dumbbell_fly():
         'DIFF_ANGLE_THRESH': 10.0,
 
         'ELBOW_THRESH': 90,
-        'SHLDR_THRESH': 300,
+        'SHLDR_THRESH': 200,
 
         'OFFSET_THRESH': 0.3,
-        'INACTIVE_THRESH': 15.0,
+        'INACTIVE_THRESH': 10.0,
 
         'CNT_FRAME_THRESH': 50,
 
@@ -88,7 +88,7 @@ def get_barbell_curl():
         'HIP_THRESH': 10,
 
         'OFFSET_THRESH': 80.0,
-        'INACTIVE_THRESH': 15.0,
+        'INACTIVE_THRESH': 10.0,
 
         'CNT_FRAME_THRESH': 50,
 
@@ -129,7 +129,7 @@ def get_dumbbell_lateral_raise():
         'ELBOW_THRESH': 90,
 
         'OFFSET_THRESH': 55.0,
-        'INACTIVE_THRESH': 15.0,
+        'INACTIVE_THRESH': 10.0,
 
         'CNT_FRAME_THRESH': 50,
 
@@ -165,7 +165,7 @@ def get_seated_tricep_press():
         'HIP_THRESH': 15,
 
         'OFFSET_THRESH': 35.0,
-        'INACTIVE_THRESH': 15.0,
+        'INACTIVE_THRESH': 10.0,
 
         'CNT_FRAME_THRESH': 50,
 
@@ -202,7 +202,7 @@ def get_bent_over_dumbbell_row():
         'HIP_THRESH': 40,
 
         'OFFSET_THRESH': 55.0,
-        'INACTIVE_THRESH': 15.0,
+        'INACTIVE_THRESH': 10.0,
 
         'CNT_FRAME_THRESH': 50,
 
@@ -231,7 +231,7 @@ def get_squat_with_weights():
     _ANGLE_HIP_KNEE_VERT = {
         'NORMAL': (0,  32),
         'TRANS': (35, 65),
-        'PASS': (70, 95)
+        'PASS': (80, 95)
     }
 
     settings = {
@@ -240,15 +240,15 @@ def get_squat_with_weights():
 
         'HIP_THRESH': [10, 50],
         'ANKLE_THRESH': 45,
-        'KNEE_THRESH': [50, 70, 95],
+        'KNEE_THRESH': [70, 80, 90],
 
         'OFFSET_THRESH': 55.0,
-        'INACTIVE_THRESH': 15.0,
+        'INACTIVE_THRESH': 10.0,
 
         'CNT_FRAME_THRESH': 50,
 
         'FEEDBACK_ID_MAP': {
-            0: {'msg': 'LOWER YOUR HIPS',
+            0: {'msg': 'GO UP',
                 'pos': (30, 80),
                 'text_color': (0, 0, 0),
                 'text_color_bg': (255, 255, 0)},
